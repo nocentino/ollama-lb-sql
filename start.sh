@@ -87,6 +87,17 @@ docker exec -it -u 0 sql-server chown mssql:mssql /var/opt/mssql/data/StackOverf
 docker exec -it -u 0 sql-server chown mssql:mssql /var/opt/mssql/data/StackOverflow2013_log.ldf
 
 
+# Use docker exec to launch sqlcmd inside the SQL Server container to attach the databases and trust the certificate
+docker exec -it sql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'S0methingS@Str0ng!' -C -d master -Q \
+  "CREATE DATABASE StackOverflow_Embeddings_Small ON \
+  (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_1.mdf'), \
+  (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_2.ndf'), \
+  (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_3.ndf'), \
+  (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_4.ndf') \
+  LOG ON (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_log.ldf') FOR ATTACH;"
+
+
+
 # Stop ollama instances
 pkill -f "ollama serve"
 

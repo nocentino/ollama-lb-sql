@@ -41,7 +41,6 @@ services:
         - sql_data:/var/opt/mssql
         - ./scripts:/scripts
         - ./certs/nginx.crt:/var/opt/mssql/security/ca-certificates/public.crt:ro
-        - ./backups:/var/opt/mssql/backups
       environment:
         - ACCEPT_EULA=Y
         - MSSQL_SA_PASSWORD=S0methingS@Str0ng!
