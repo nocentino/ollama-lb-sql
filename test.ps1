@@ -1,5 +1,5 @@
 # You can run this PowerShell script on your Mac using pwsh (PowerShell Core).
-# This script sends 1000 POST requests to the Ollama endpoint using 8 parallel threads.
+# This script sends concurrent requests to the Ollama endpoint using parallel threads.
 
 $totalWork = 4000
 $threads = 4
