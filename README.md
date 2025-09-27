@@ -1,46 +1,75 @@
-# Ollama Load Balanced SQL
+# StackOverflow Embeddings SQL Demo
 
-Simple setup with 4 ollama instances, nginx load balancer, and SQL Server 2025 RC1 with vector support.
+## Overview
 
-## Quick Start
+This project demonstrates how to set up and use SQL Server with vector embeddings, including:
+- Restoring the StackOverflow sample database
+- Generating and storing text embeddings using external models (Ollama)
+- Load balancing and performance testing with Nginx
 
-```bash
-./start.sh
-```
+## Getting Started
 
-This will:
-- Install ollama if needed
-- Start 4 ollama instances on ports 11434-11437
-- Pull nomic-embed-text model
-- Start nginx load balancer in Docker
-- Start SQL Server 2025 in Docker
+### Prerequisites
 
-## Testing
+- Docker & Docker Compose
+- Ollama
 
-```bash
-# Test load balancer
-curl -k https://localhost:443/lb-health
+### Setup
 
-# Test SQL Server
-# Server: localhost,1433
-# Username: sa  
-# Password: S0methingS@Str0ng!
+1. **Clone the repository**
 
-# Run vector-demos.sql to test embeddings
-```
+   ```sh
+   git clone https://github.com/your/repo.git
+   cd ollama-lb-sql
+   ```
 
-## Services
+2. **Restore the StackOverflow Database**
 
-- **ollama**: 4 instances on host (ports 11434-11437)
-- **nginx**: Load balancer in Docker (port 443)  
-- **sql-server**: SQL Server 2025 in Docker (port 1433)
+   The `restore_stackoverflow.sql` script attaches the database files.  
+   Make sure the MDF/NDF/LDF files are present in `/var/opt/mssql/data/` inside the SQL Server container.
 
-## Cleanup
+   ```sql
+   CREATE DATABASE StackOverflow_Embeddings_Small
+   ON 
+       (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_1.mdf'),
+       (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_2.ndf'),
+       (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_3.ndf'),
+       (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_4.ndf')
+   LOG ON
+       (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_log.ldf')
+   FOR ATTACH ;
+   ```
 
-```bash
-# Stop ollama instances
-./stop.sh
+3. **Start the Services**
 
-# Stop Docker services
-docker compose down
-```
+   ```sh
+   docker compose up -d
+   ```
+
+   This will start:
+   - SQL Server
+   - Nginx load balancer
+   - Certificate generator
+
+4. **Configure Nginx for Connection Pooling**
+
+   The `nginx.conf` is set up for high concurrency and connection pooling.  
+
+   Key settings:
+   - `keepalive 256;` in the `upstream` block
+   - `proxy_set_header Connection "";` in each `location` block
+
+5. **Generate Embeddings**
+
+   Use the provided T-SQL scripts (see `vector-demos.sql`) to generate and store embeddings via the external model endpoints.
+
+6. **Load Testing**
+
+   Use `test.ps1` to simulate concurrent API calls and measure performance.
+
+   ```sh
+   pwsh ./test.ps1
+   ```
+
+   Adjust `$totalWork` and `$threads` in the script as needed.
+

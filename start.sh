@@ -11,7 +11,10 @@ OLLAMA_HOST=127.0.0.1:11435 ollama serve &
 OLLAMA_HOST=127.0.0.1:11436 ollama serve &
 OLLAMA_HOST=127.0.0.1:11437 ollama serve &
 
-sleep 5
+
+# Wait for a few seconds to ensure all instances are up
+sleep 10
+
 
 # Pull model on all instances
 OLLAMA_HOST=127.0.0.1:11434 ollama pull nomic-embed-text &
@@ -19,7 +22,7 @@ OLLAMA_HOST=127.0.0.1:11435 ollama pull nomic-embed-text &
 OLLAMA_HOST=127.0.0.1:11436 ollama pull nomic-embed-text &
 OLLAMA_HOST=127.0.0.1:11437 ollama pull nomic-embed-text &
 
-wait
+
 
 # List pulled models on all instances
 OLLAMA_HOST=127.0.0.1:11434 ollama list
@@ -35,18 +38,21 @@ curl -k -X POST http://localhost:11434/api/embed \
     "model": "nomic-embed-text",
     "input": "test message for instance 11434"
   }'
+
 curl -k -X POST http://localhost:11435/api/embed \
   -H "Content-Type: application/json" \
   -d '{
     "model": "nomic-embed-text",
     "input": "test message for instance 11435"
   }'
+
 curl -k -X POST http://localhost:11436/api/embed \
   -H "Content-Type: application/json" \
   -d '{
     "model": "nomic-embed-text",
     "input": "test message for instance 11436"
   }'
+
 curl -k -X POST http://localhost:11437/api/embed \
   -H "Content-Type: application/json" \
   -d '{
@@ -55,61 +61,25 @@ curl -k -X POST http://localhost:11437/api/embed \
   }'
 
 
-
 # Start nginx and SQL Server
 docker-compose up --build -d
 
 
-docker exec -it -u 0 sql-server /bin/bash
-
-apt-get update && apt-get install curl -y 
-
-curl -k -X POST https://host.docker.internal:443/api/embed \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "nomic-embed-text",
-    "input": "test message for load balancer"
-  }'
-
-
-curl -k -X POST https://nginx-lb:443/api/embed \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "nomic-embed-text",
-    "input": "test message for load balancer"
-  }' -vvvv
-
-
-
-curl -k -X POST https://host.docker.internal:444/api/embed \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "nomic-embed-text",
-    "input": "test message for load balancer"
-  }'
-
-
-curl -k -X POST https://nginx-lb:444/api/embed \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "nomic-embed-text",
-    "input": "test message for load balancer"
-  }' -vvvv
-
-
-openssl  s_client -connect nginx-lb:443 -showcerts 
-
-
-
 echo "Started 4 ollama instances, nginx load balancer, and SQL Server 2025"
 
+# Go download StackOverflow2013 database from https://www.brentozar.com/archive/2015/10/how-to-download-the-stack-overflow-database-via-bittorrent/
+# I'm using the medium version which is ~50GB
 
+
+# Copy the MDF and LDF files to the SQL Server container
 docker cp /Users/aen/Downloads/StackOverflow2013_201809117/StackOverflow2013_1.mdf sql-server:/var/opt/mssql/data/
 docker cp /Users/aen/Downloads/StackOverflow2013_201809117/StackOverflow2013_2.ndf sql-server:/var/opt/mssql/data/
 docker cp /Users/aen/Downloads/StackOverflow2013_201809117/StackOverflow2013_3.ndf sql-server:/var/opt/mssql/data/
 docker cp /Users/aen/Downloads/StackOverflow2013_201809117/StackOverflow2013_4.ndf sql-server:/var/opt/mssql/data/
 docker cp /Users/aen/Downloads/StackOverflow2013_201809117/StackOverflow2013_log.ldf sql-server:/var/opt/mssql/data/
 
+
+# Change ownership of the files to the mssql user
 docker exec -it -u 0 sql-server chown mssql:mssql /var/opt/mssql/data/StackOverflow2013_1.mdf
 docker exec -it -u 0 sql-server chown mssql:mssql /var/opt/mssql/data/StackOverflow2013_2.ndf
 docker exec -it -u 0 sql-server chown mssql:mssql /var/opt/mssql/data/StackOverflow2013_3.ndf
