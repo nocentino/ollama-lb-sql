@@ -184,7 +184,7 @@ GO
 
 -- generate embeddings for all posts in batches of 10000
 
-DECLARE @BatchSize INT = 10000;     -- Number of rows to process in each batch
+DECLARE @BatchSize INT = 10000;    -- Number of rows to process in each batch
 DECLARE @StartRow INT = 0;         -- Starting row for the current batch
 DECLARE @MaxPostID INT;            -- Maximum PostID in the Posts table
 
