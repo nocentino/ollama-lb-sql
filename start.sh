@@ -11,6 +11,11 @@ OLLAMA_HOST=127.0.0.1:11435 ollama serve &
 OLLAMA_HOST=127.0.0.1:11436 ollama serve &
 OLLAMA_HOST=127.0.0.1:11437 ollama serve &
 
+OLLAMA_HOST=127.0.0.1:11438 ollama serve &
+OLLAMA_HOST=127.0.0.1:11439 ollama serve &
+OLLAMA_HOST=127.0.0.1:11440 ollama serve &
+OLLAMA_HOST=127.0.0.1:11441 ollama serve &
+
 
 # Wait for a few seconds to ensure all instances are up
 sleep 10

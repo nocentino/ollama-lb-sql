@@ -182,4 +182,40 @@ SET STATISTICS TIME OFF;
 SET STATISTICS IO OFF;
 GO
 
-select count(*) from dbo.Posts
+-- generate embeddings for all posts in batches of 1000
+
+DECLARE @BatchSize INT = 1000;     -- Number of rows to process in each batch
+DECLARE @StartRow INT = 0;         -- Starting row for the current batch
+DECLARE @MaxPostID INT;            -- Maximum PostID in the Posts table
+
+-- Get the maximum PostID to determine the loop's end condition
+SELECT @MaxPostID = MAX(Id) FROM dbo.Posts;
+
+-- Loop through the Posts table in chunks to manage memory usage
+WHILE @StartRow <= @MaxPostID
+BEGIN
+    -- Insert embeddings for the current batch
+    INSERT INTO dbo.PostEmbeddings (PostID, Embedding, CreatedAt)
+    SELECT 
+        p.Id AS PostID,
+        AI_GENERATE_EMBEDDINGS(p.Title USE MODEL ollama_lb) AS Embedding, -- Generate embeddings
+        GETDATE() AS CreatedAt -- Timestamp for when the embedding is created
+    FROM 
+        dbo.Posts p
+    WHERE 
+        p.Id BETWEEN @StartRow AND @StartRow + @BatchSize - 1 -- Process rows in the current batch
+        AND NOT EXISTS (
+            SELECT 1 
+            FROM dbo.PostEmbeddings pe 
+            WHERE pe.PostID = p.Id
+        ) -- Avoid duplicate entries
+        AND p.Title IS NOT NULL; -- Skip rows where Title is NULL
+
+    -- Increment the starting row for the next batch
+    SET @StartRow = @StartRow + @BatchSize;
+    PRINT 'Processed rows from ' + CAST(@StartRow - @BatchSize AS NVARCHAR(10)) + ' to ' + CAST(@StartRow - 1 AS NVARCHAR(10));
+END;
+GO
+PRINT 'Embedding generation completed for all posts.';
+
+
