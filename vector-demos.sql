@@ -209,13 +209,15 @@ BEGIN
             FROM dbo.PostEmbeddings pe 
             WHERE pe.PostID = p.Id
         ) -- Avoid duplicate entries
-        AND p.Title IS NOT NULL; -- Skip rows where Title is NULL
+        AND p.Title IS NOT NULL -- Skip rows where Title is NULL
+        OPTION(USE HINT('ENABLE_PARALLEL_PLAN_PREFERENCE'))
 
     -- Increment the starting row for the next batch
     SET @StartRow = @StartRow + @BatchSize;
     PRINT 'Processed rows from ' + CAST(@StartRow - @BatchSize AS NVARCHAR(10)) + ' to ' + CAST(@StartRow - 1 AS NVARCHAR(10));
 END;
 GO
+
 PRINT 'Embedding generation completed for all posts.';
 
 
