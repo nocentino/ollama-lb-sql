@@ -11,12 +11,6 @@ OLLAMA_HOST=127.0.0.1:11435 ollama serve &
 OLLAMA_HOST=127.0.0.1:11436 ollama serve &
 OLLAMA_HOST=127.0.0.1:11437 ollama serve &
 
-OLLAMA_HOST=127.0.0.1:11438 ollama serve &
-OLLAMA_HOST=127.0.0.1:11439 ollama serve &
-OLLAMA_HOST=127.0.0.1:11440 ollama serve &
-OLLAMA_HOST=127.0.0.1:11441 ollama serve &
-
-
 # Wait for a few seconds to ensure all instances are up
 sleep 10
 
@@ -101,6 +95,8 @@ docker exec -it sql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '
   (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_4.ndf') \
   LOG ON (FILENAME = N'/var/opt/mssql/data/StackOverflow2013_log.ldf') FOR ATTACH;"
 
+
+# Head over to vector-demos.sql and run the SQL script to generate vector embeddings for all posts in the StackOverflow_Embeddings_Small database
 
 
 # Stop ollama instances
