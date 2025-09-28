@@ -11,6 +11,7 @@ OLLAMA_HOST=127.0.0.1:11435 ollama serve &
 OLLAMA_HOST=127.0.0.1:11436 ollama serve &
 OLLAMA_HOST=127.0.0.1:11437 ollama serve &
 
+
 # Wait for a few seconds to ensure all instances are up
 sleep 10
 
@@ -58,6 +59,7 @@ curl -k -X POST http://localhost:11437/api/embed \
     "model": "nomic-embed-text",
     "input": "test message for instance 11437"
   }'
+
 
 
 # Start nginx and SQL Server
