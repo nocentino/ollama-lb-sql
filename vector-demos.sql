@@ -1,4 +1,7 @@
 -- Step 1: Add a new filegroup for storing embeddings (improves performance and organization)
+USE [StackOverflow_Embeddings_Small];
+GO
+
 ALTER DATABASE [StackOverflow_Embeddings_Small]
 ADD FILEGROUP EmbeddingsFileGroup;
 GO
@@ -23,9 +26,6 @@ CREATE TABLE dbo.PostEmbeddings (
 GO
 
 -- Switch to the embeddings database
-USE [StackOverflow_Embeddings_Small];
-GO
-
 PRINT 'Step 2: Creating external model connection to load-balanced Ollama...';
 GO
 
@@ -33,6 +33,13 @@ GO
 IF EXISTS (SELECT * FROM sys.external_models WHERE name = 'ollama_lb')
 BEGIN
     DROP EXTERNAL MODEL ollama_lb;
+    PRINT 'Existing external model dropped.';
+END
+GO
+
+IF EXISTS (SELECT * FROM sys.external_models WHERE name = 'ollama_single')
+BEGIN
+    DROP EXTERNAL MODEL ollama_single;
     PRINT 'Existing external model dropped.';
 END
 GO
@@ -138,7 +145,7 @@ GO
 PRINT 'Generating embeddings using LOAD-BALANCED endpoint...';
 
 INSERT INTO dbo.PostEmbeddings (PostID, Embedding, CreatedAt)     
-SELECT top 10000
+SELECT top 1000
     p.Id AS PostID,
     AI_GENERATE_EMBEDDINGS(p.Title USE MODEL ollama_lb) AS Embedding,
     GETDATE() AS CreatedAt

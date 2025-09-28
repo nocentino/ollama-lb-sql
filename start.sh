@@ -72,11 +72,11 @@ echo "Started 4 ollama instances, nginx load balancer, and SQL Server 2025"
 
 
 # Copy the MDF and LDF files to the SQL Server container
-docker cp /Users/aen/Downloads/StackOverflow2013_201809117/StackOverflow2013_1.mdf sql-server:/var/opt/mssql/data/
-docker cp /Users/aen/Downloads/StackOverflow2013_201809117/StackOverflow2013_2.ndf sql-server:/var/opt/mssql/data/
-docker cp /Users/aen/Downloads/StackOverflow2013_201809117/StackOverflow2013_3.ndf sql-server:/var/opt/mssql/data/
-docker cp /Users/aen/Downloads/StackOverflow2013_201809117/StackOverflow2013_4.ndf sql-server:/var/opt/mssql/data/
-docker cp /Users/aen/Downloads/StackOverflow2013_201809117/StackOverflow2013_log.ldf sql-server:/var/opt/mssql/data/
+docker cp StackOverflow2013_1.mdf sql-server:/var/opt/mssql/data/
+docker cp StackOverflow2013_2.ndf sql-server:/var/opt/mssql/data/
+docker cp StackOverflow2013_3.ndf sql-server:/var/opt/mssql/data/
+docker cp StackOverflow2013_4.ndf sql-server:/var/opt/mssql/data/
+docker cp StackOverflow2013_log.ldf sql-server:/var/opt/mssql/data/
 
 
 # Change ownership of the files to the mssql user
