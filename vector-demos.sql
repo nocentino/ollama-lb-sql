@@ -137,14 +137,15 @@ GO
 -- Test 1: Load-balanced endpoint (nginx)
 PRINT 'Generating embeddings using LOAD-BALANCED endpoint...';
 
-INSERT INTO dbo.PostEmbeddings  WITH(TABLOCK) (PostID, Embedding, CreatedAt)     
-SELECT top 1000
+INSERT INTO dbo.PostEmbeddings (PostID, Embedding, CreatedAt)     
+SELECT top 10000
     p.Id AS PostID,
     AI_GENERATE_EMBEDDINGS(p.Title USE MODEL ollama_lb) AS Embedding,
     GETDATE() AS CreatedAt
 FROM dbo.Posts p
 WHERE p.Title IS NOT NULL
-    AND NOT EXISTS (SELECT 1 FROM dbo.PostEmbeddings pe WHERE pe.PostID = p.Id) OPTION(USE HINT('ENABLE_PARALLEL_PLAN_PREFERENCE'))
+    AND NOT EXISTS (SELECT 1 FROM dbo.PostEmbeddings pe WHERE pe.PostID = p.Id) 
+    OPTION(USE HINT('ENABLE_PARALLEL_PLAN_PREFERENCE'))
 GO
 /*
  SQL Server Execution Times:
@@ -174,3 +175,4 @@ SET STATISTICS TIME OFF;
 SET STATISTICS IO OFF;
 GO
 
+select count(*) from dbo.Posts
