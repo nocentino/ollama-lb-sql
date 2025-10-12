@@ -73,11 +73,11 @@ echo "Started 4 ollama instances, nginx load balancer, and SQL Server 2025"
 
 
 # Copy the MDF and LDF files to the SQL Server container
-docker cp StackOverflow2013_1.mdf sql-server:/var/opt/mssql/data/
-docker cp StackOverflow2013_2.ndf sql-server:/var/opt/mssql/data/
-docker cp StackOverflow2013_3.ndf sql-server:/var/opt/mssql/data/
-docker cp StackOverflow2013_4.ndf sql-server:/var/opt/mssql/data/
-docker cp StackOverflow2013_log.ldf sql-server:/var/opt/mssql/data/
+docker cp StackOverflow2013_1.mdf sql-server:/var/opt/mssql/data/ &
+docker cp StackOverflow2013_2.ndf sql-server:/var/opt/mssql/data/ &
+docker cp StackOverflow2013_3.ndf sql-server:/var/opt/mssql/data/ &
+docker cp StackOverflow2013_4.ndf sql-server:/var/opt/mssql/data/ &
+docker cp StackOverflow2013_log.ldf sql-server:/var/opt/mssql/data/ &
 
 
 # Change ownership of the files to the mssql user
@@ -108,5 +108,5 @@ pkill -f "ollama serve"
 echo "Stopped ollama instances"
 
 
-# remove all docker resources, including the data volumes
-# docker compose down -v
+# remove all docker resources, add --volumes if you want to remove volumes too
+# docker compose down 
