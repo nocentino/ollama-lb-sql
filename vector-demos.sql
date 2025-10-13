@@ -29,21 +29,6 @@ GO
 PRINT 'Step 2: Creating external model connection to load-balanced Ollama...';
 GO
 
--- Drop existing external model if it exists (cleanup for reruns)
-IF EXISTS (SELECT * FROM sys.external_models WHERE name = 'ollama_lb')
-BEGIN
-    DROP EXTERNAL MODEL ollama_lb;
-    PRINT 'Existing external model dropped.';
-END
-GO
-
-IF EXISTS (SELECT * FROM sys.external_models WHERE name = 'ollama_single')
-BEGIN
-    DROP EXTERNAL MODEL ollama_single;
-    PRINT 'Existing external model dropped.';
-END
-GO
-
 -- Create external model pointing to our load-balanced nginx endpoint
 -- (443 = nginx load balancer, 444 = direct backend)
 CREATE EXTERNAL MODEL ollama_lb
@@ -64,9 +49,6 @@ WITH (
 );
 GO
 
-
-PRINT 'External model created successfully!';
-GO
 
 PRINT 'Testing load-balanced Ollama connection...';
 GO
@@ -122,10 +104,11 @@ BEGIN CATCH
 END CATCH
 GO
 
--- Get and set the database compatibility level (required for vector features)
+-- Get and set the database compatibility level (required for ENABLE_PARALLEL_PLAN_PREFERENCE hint)
 SELECT compatibility_level
 FROM sys.databases
 WHERE name = 'StackOverflow_Embeddings_Small';
+
 
 PRINT 'Setting database compatibility level to 170...';
 ALTER DATABASE [StackOverflow_Embeddings_Small] SET COMPATIBILITY_LEVEL = 170;
@@ -231,4 +214,27 @@ GO
 -- count the number of embeddings generated
 SELECT COUNT(*) AS TotalEmbeddings
 FROM dbo.PostEmbeddings;
+GO
+
+
+
+
+
+
+-- Clean up all the resources created (for reruns)
+PRINT 'Cleaning up resources...';
+GO
+DROP TABLE IF EXISTS dbo.PostEmbeddings;
+GO
+DROP EXTERNAL MODEL ollama_lb;
+GO
+DROP EXTERNAL MODEL ollama_single;
+GO
+ALTER DATABASE [StackOverflow_Embeddings_Small]
+REMOVE FILE StackOverflowEmbeddings;
+GO
+ALTER DATABASE [StackOverflow_Embeddings_Small]
+REMOVE FILEGROUP EmbeddingsFileGroup;
+GO
+PRINT 'Cleanup completed.';
 GO

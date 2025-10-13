@@ -62,21 +62,49 @@ curl -k -X POST http://localhost:11437/api/embed \
 
 
 
+# Examine the docker-compose.yml file to see our nginx load balancer and SQL Server 2025 setup
+code docker-compose.yml
+
+
+# Examine the nginx.conf file to see how the load balancing is configured
+code ./config/nginx.conf
+
+
 # Start nginx and SQL Server
 docker-compose up --build -d
 
 
 echo "Started 4 ollama instances, nginx load balancer, and SQL Server 2025"
 
+
+# Use curl to verify the nginx load balancer is working by sending a test request to port 443
+curl -k -X POST https://localhost:443/api/embed \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nomic-embed-text",
+    "input": "test message for instance 443"
+  }'
+
+
+# Use curl to verify the nginx single backend is working by sending a test request to port 444
+curl -k -X POST https://localhost:444/api/embed \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nomic-embed-text",
+    "input": "test message for instance 444"
+  }'
+   
+
+
 # Go download StackOverflow2013 database from https://www.brentozar.com/archive/2015/10/how-to-download-the-stack-overflow-database-via-bittorrent/
 # I'm using the medium version which is ~50GB
 
 
 # Copy the MDF and LDF files to the SQL Server container
-docker cp StackOverflow2013_1.mdf sql-server:/var/opt/mssql/data/ &
-docker cp StackOverflow2013_2.ndf sql-server:/var/opt/mssql/data/ &
-docker cp StackOverflow2013_3.ndf sql-server:/var/opt/mssql/data/ &
-docker cp StackOverflow2013_4.ndf sql-server:/var/opt/mssql/data/ &
+docker cp StackOverflow2013_1.mdf   sql-server:/var/opt/mssql/data/ &
+docker cp StackOverflow2013_2.ndf   sql-server:/var/opt/mssql/data/ &
+docker cp StackOverflow2013_3.ndf   sql-server:/var/opt/mssql/data/ &
+docker cp StackOverflow2013_4.ndf   sql-server:/var/opt/mssql/data/ &
 docker cp StackOverflow2013_log.ldf sql-server:/var/opt/mssql/data/ &
 
 
@@ -99,7 +127,7 @@ docker exec -it sql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '
 
 
 # Head over to vector-demos.sql and run the SQL script to generate vector embeddings for all posts in the StackOverflow_Embeddings_Small database
-
+code vector-demos.sql
 
 # Stop ollama instances
 pkill -f "ollama serve"
