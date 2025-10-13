@@ -137,6 +137,7 @@ WHERE p.Title IS NOT NULL
     AND NOT EXISTS (SELECT 1 FROM dbo.PostEmbeddings pe WHERE pe.PostID = p.Id) 
     OPTION(USE HINT('ENABLE_PARALLEL_PLAN_PREFERENCE'))
 GO
+
 /*
  SQL Server Execution Times:
    CPU time = 2047 ms,  elapsed time = 5359 ms.
@@ -155,6 +156,7 @@ FROM dbo.Posts p
 WHERE p.Title IS NOT NULL
     AND NOT EXISTS (SELECT 1 FROM dbo.PostEmbeddings pe WHERE pe.PostID = p.Id) OPTION (MAXDOP 1);
 GO
+
 /*
 
  SQL Server Execution Times:
